@@ -5,6 +5,7 @@ n_want = numel(dir('cropped_training_images_faces/*.jpg'));
 
 imageDir = 'images_notfaces';
 imageList = dir(sprintf('%s/*.jpg',imageDir));
+croppedfaceList = dir("cropped_training_images_faces/*.jpg");
 nImages = length(imageList);
 
 new_imageDir = 'cropped_training_images_notfaces';
@@ -34,6 +35,9 @@ while n_have < n_want
     % randomly crop a part of an image
     win =  randomCropWindow2d(size(image), [dim , dim]);
     crop =  imcrop(image, win);
+    
+    crop_face = imread(strcat(croppedfaceList(n_have+1).folder, "\\",croppedfaceList(n_have+1).name));
+    
     % save to directory
     filename = strcat(new_imageDir, "\\img_",string(n_have), ".jpg");
     imwrite(crop, filename);
@@ -45,11 +49,13 @@ while n_have < n_want
     % save valid and train images to corrosponding folders
     if (n_have <= n_train)
         filename = strcat(new_trainDir, "\\img_",string(n_have), ".jpg");
+        filename2 = strcat(new_trainDir, "\\", croppedfaceList(n_have+1).name);
     else
         filename = strcat(new_validDir, "\\img_",string(n_have-n_train), ".jpg");
+        filename2 = strcat(new_validDir, "\\img_",croppedfaceList(n_have+1).name);
     end
     imwrite(crop, filename);
-    imwrite(image, filename);
+    imwrite(crop_face, filename2);
     
     
     fprintf("Saving(%d/%d): %s\n", n_have, n_want, filename);

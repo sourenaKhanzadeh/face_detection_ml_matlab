@@ -7,23 +7,44 @@ imageDir = 'images_notfaces';
 imageList = dir(sprintf('%s/*.jpg',imageDir));
 nImages = length(imageList);
 
-imread(cat(3, imageList(1).folder, "\",imageList(1).name))
-
 new_imageDir = 'cropped_training_images_notfaces';
+new_testDir = "validate_images";
+new_trainDir = "train_images";
+
 mkdir(new_imageDir);
+mkdir(new_trainDir);
+mkdir(new_testDir);
 
 dim = 36;
 
-% while n_have < n_want
-%     % generate random 36x36 crops from the non-face images
-%     % choose image based on the modulus time
-%     % to loop over all images
-%     index = mod(n_have, nImages) + 1;
-%     
-%     % randomly crop a part of an image
-%     
-%     % save to directory
-%     
-%     % go to next frame
-%     n_have = n_have + 1;
-% end
+while n_have < n_want
+    % generate random 36x36 crops from the non-face images
+    % choose image based on the modulus time
+    % to loop over all images
+    index = mod(n_have, nImages) + 1;
+    image = imread(strcat(imageList(index).folder, "\\",imageList(index).name));
+    image = rgb2gray(image);
+    
+    % randomly crop a part of an image
+    win =  randomCropWindow2d(size(image), [dim , dim]);
+    crop =  imcrop(image, win);
+    % save to directory
+    filename = strcat(new_imageDir, "\\img_",string(n_have), ".jpg");
+    imwrite(crop, filename);
+    sprintf("Saving(%d/%d): %s", filename, n_have, n_want);
+    
+    % splitting data 80-20 train and valid
+    n_train = round(n_want *.8, 0);
+    n_test = round(n_want *.2, 0);
+    
+    % save valid and train images to corrosponding folders
+    if (n_have <= n_train)
+        filename = strcat(, "\\img_",string(n_have), ".jpg");
+        
+    else
+        
+    end
+    
+    % go to next frame
+    n_have = n_have + 1;
+end

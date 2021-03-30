@@ -1,2 +1,2 @@
 **/*.jpg
-pos_neg_feats.mat
+./*.mat

@@ -1,4 +1,4 @@
-run('../vlfeat-0.9.20/toolbox/vl_setup')
+run('../vlfeat-0.9.21/toolbox/vl_setup')
 load('pos_neg_feats.mat')
 
 feats = cat(1,pos_feats,neg_feats);

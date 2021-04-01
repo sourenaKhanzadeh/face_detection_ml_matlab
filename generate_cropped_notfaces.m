@@ -9,17 +9,25 @@ croppedfaceList = dir("cropped_training_images_faces/*.jpg");
 nImages = length(imageList);
 
 new_imageDir = 'cropped_training_images_notfaces';
-new_validDir = "validate_images";
-new_trainDir = "train_images";
+new_validPosDir = "validate_pos_images";
+new_validNegDir = "validate_neg_images";
+new_trainPosDir = "train_pos_images";
+new_trainNegDir = "train_neg_images";
 
 if ~isfolder(new_imageDir)
-    mkdir(new_imageDir);
+   mkdir(new_imageDir);
 end
-if ~isfolder(new_trainDir)
-    mkdir(new_trainDir);
+if ~isfolder(new_validPosDir)
+   mkdir(new_validPosDir);
 end
-if ~isfolder(new_validDir)
-    mkdir(new_validDir);
+if ~isfolder(new_validNegDir)
+   mkdir(new_validNegDir);
+end
+if ~isfolder(new_trainPosDir)
+   mkdir(new_trainPosDir); 
+end
+if ~isfolder(new_trainNegDir)
+   mkdir(new_trainNegDir); 
 end
 
 dim = 36;
@@ -48,11 +56,11 @@ while n_have < n_want
     
     % save valid and train images to corrosponding folders
     if (n_have <= n_train)
-        filename = strcat(new_trainDir, "\\img_",string(n_have), ".jpg");
-        filename2 = strcat(new_trainDir, "\\", croppedfaceList(n_have+1).name);
+        filename = strcat(new_trainNegDir, "\\img_",string(n_have), ".jpg");
+        filename2 = strcat(new_trainPosDir, "\\", croppedfaceList(n_have+1).name);
     else
-        filename = strcat(new_validDir, "\\img_",string(n_have-n_train), ".jpg");
-        filename2 = strcat(new_validDir, "\\img_",croppedfaceList(n_have+1).name);
+        filename = strcat(new_validNegDir, "\\img_",string(n_have-n_train), ".jpg");
+        filename2 = strcat(new_validPosDir, "\\",croppedfaceList(n_have+1).name);
     end
     imwrite(crop, filename);
     imwrite(crop_face, filename2);

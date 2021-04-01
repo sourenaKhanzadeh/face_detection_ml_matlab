@@ -22,3 +22,6 @@ fprintf('Classifier performance on test data:\n')
 valid_confidences = [x_pos_valid; x_neg_valid]*w + b;
 
 [tp_rate_valid, fp_rate_valid, tn_rate_valid, fn_rate_valid] =  report_accuracy(valid_confidences, valid_labels);
+
+
+save('my_svm.mat', 'w', 'b');

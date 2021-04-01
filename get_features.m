@@ -77,5 +77,5 @@ for i=1:valid_neg_nImages
 %     pause;
 end
 
-save('pos_x_neg_train.mat','x_pos_train','x_neg_train','pos_nImages','neg_nImages')
-save('pos_x_neg_valid.mat','x_pos_valid','x_neg_valid','valid_pos_nImages','valid_neg_nImages')
+save('pos_neg_feats.mat','x_pos_train','x_neg_train','pos_nImages','neg_nImages')
+save('pos_neg_valid_feats.mat','x_pos_valid','x_neg_valid','valid_pos_nImages','valid_neg_nImages')

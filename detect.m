@@ -1,4 +1,8 @@
 run('../vlfeat-0.9.21/toolbox/vl_setup')
+
+% load w and b
+load("my_svm.mat");
+
 imageDir = 'test_images';
 imageList = dir(sprintf('%s/*.jpg',imageDir));
 nImages = length(imageList);
@@ -23,13 +27,16 @@ for i=1:nImages
     % represent 36x36-pixel faces)
     [rows,cols,~] = size(feats);    
     confs = zeros(rows,cols);
+    
     for r=1:rows-5
         for c=1:cols-5
 
         % create feature vector for the current window and classify it using the SVM model, 
+        x = feats(r:r+5, c:c+5, :);
         % take dot product between feature vector and w and add b,
-	% store the result in the matrix of confidence scores confs(r,c)
-
+        pred = dot(w, x(:)) + b;
+        % store the result in the matrix of confidence scores confs(r,c)
+        confs(r, c) = pred;
         end
     end
        

@@ -44,8 +44,8 @@ for i=1:nImages
     % get the most confident predictions 
     [~,inds] = sort(confs(:),'descend');
     inds = inds(1:floor((rows*cols)/dim)); % (use a bigger number for better recall)
-    aboxes = zeros(4);
-    aconfs = zeros(1);
+    aboxes = [];
+    aconfs = [];
     for n=1:numel(inds)        
         [row,col] = ind2sub([size(feats,1) size(feats,2)],inds(n));
         
@@ -55,7 +55,7 @@ for i=1:nImages
                 (row+cellSize-1)*cellSize];
         conf = confs(row,col);
         if (conf > 0.6)
-            for k=1:size(aboxes, 1)
+            for k=1:size(aconfs, 1)
                 pbox = aboxes(k, :);
                 bi=[max(bbox(1),pbox(1)) ; max(bbox(2),pbox(2)) ; min(bbox(3),pbox(3)) ; min(bbox(4),pbox(4))];
                 iw=bi(3)-bi(1)+1;
@@ -66,15 +66,11 @@ for i=1:nImages
                        (pbox(3)-pbox(1)+1)*(pbox(4)-pbox(2)+1)-...
                        iw*ih;
                     ov=iw*ih/ua;
-                    if ov > 0.5
-                        if conf > aconfs(k)
+                    if ov > 0.01
+                        if conf < aconfs(k)
                             bbox = [];
+                            conf = [];
                             break
-                        else
-                            bboxes(ib, :) = [];
-                            confidences(ib, :) = [];
-                            ib = ib- 1;
-                            continue
                         end
                         
                     end

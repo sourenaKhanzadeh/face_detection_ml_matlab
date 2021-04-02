@@ -8,6 +8,7 @@ imageList = dir(sprintf('%s/*.jpg',imageDir));
 nImages = length(imageList);
 
 bboxes = zeros(0,4);
+ib = 0;
 confidences = zeros(0,1);
 image_names = cell(0,1);
 
@@ -36,13 +37,15 @@ for i=1:nImages
         % take dot product between feature vector and w and add b,
         pred = dot(w, x(:)) + b;
         % store the result in the matrix of confidence scores confs(r,c)
-        confs(r, c) = pred;
+        confs(r, c)= pred;
         end
     end
        
     % get the most confident predictions 
     [~,inds] = sort(confs(:),'descend');
-    inds = inds(1:20); % (use a bigger number for better recall)
+    inds = inds(1:floor((rows*cols)/dim)); % (use a bigger number for better recall)
+    aboxes = zeros(4);
+    aconfs = zeros(1);
     for n=1:numel(inds)        
         [row,col] = ind2sub([size(feats,1) size(feats,2)],inds(n));
         
@@ -51,26 +54,58 @@ for i=1:nImages
                 (col+cellSize-1)*cellSize ...
                 (row+cellSize-1)*cellSize];
         conf = confs(row,col);
-        image_name = {imageList(i).name};
+        if (conf > 0.6)
+            for k=1:size(aboxes, 1)
+                pbox = aboxes(k, :);
+                bi=[max(bbox(1),pbox(1)) ; max(bbox(2),pbox(2)) ; min(bbox(3),pbox(3)) ; min(bbox(4),pbox(4))];
+                iw=bi(3)-bi(1)+1;
+                ih=bi(4)-bi(2)+1;
+                if iw>0 && ih>0       
+                    % compute overlap as area of intersection / area of union
+                    ua=(bbox(3)-bbox(1)+1)*(bbox(4)-bbox(2)+1)+...
+                       (pbox(3)-pbox(1)+1)*(pbox(4)-pbox(2)+1)-...
+                       iw*ih;
+                    ov=iw*ih/ua;
+                    if ov > 0.5
+                        if conf > aconfs(k)
+                            bbox = [];
+                            break
+                        else
+                            bboxes(ib, :) = [];
+                            confidences(ib, :) = [];
+                            ib = ib- 1;
+                            continue
+                        end
+                        
+                    end
+                end
+            end
         
-        % plot
-        plot_rectangle = [bbox(1), bbox(2); ...
-            bbox(1), bbox(4); ...
-            bbox(3), bbox(4); ...
-            bbox(3), bbox(2); ...
-            bbox(1), bbox(2)];
-        plot(plot_rectangle(:,1), plot_rectangle(:,2), 'g-');
-        
-        % save         
-        bboxes = [bboxes; bbox];
-        confidences = [confidences; conf];
-        image_names = [image_names; image_name];
+            image_name = {imageList(i).name};
+
+            % plot
+            if length(bbox) > 1
+                plot_rectangle = [bbox(1), bbox(2); ...
+                    bbox(1), bbox(4); ...
+                    bbox(3), bbox(4); ...
+                    bbox(3), bbox(2); ...
+                    bbox(1), bbox(2)];
+                plot(plot_rectangle(:,1), plot_rectangle(:,2), 'g-');
+            end
+            % save    
+            aboxes = [aboxes; bbox];
+            aconfs = [aconfs; conf];
+            bboxes = [bboxes; bbox];
+            ib = ib + 1;
+            confidences = [confidences; conf];
+            image_names = [image_names; image_name];
+        end
     end
-    pause;
+%     pause;
     fprintf('got preds for image %d/%d\n', i,nImages);
 end
 
 % evaluate
 label_path = 'test_images_gt.txt';
 [gt_ids, gt_bboxes, gt_isclaimed, tp, fp, duplicate_detections] = ...
-    evaluate_detections(bboxes, confidences, image_names, label_path);
+    evaluate_detections_on_test(bboxes, confidences, image_names, label_path);

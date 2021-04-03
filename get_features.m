@@ -18,8 +18,8 @@ valid_neg_imageDir = 'validate_neg_images';
 valid_neg_imageList = dir(sprintf('%s/*.jpg',valid_neg_imageDir));
 valid_neg_nImages = length(valid_neg_imageList);
 
-cellSize = 3;
-featSize = 31*12^2;
+cellSize = 6;
+featSize = 31*cellSize^2;
 
 x_pos_train = zeros(pos_nImages,featSize);
 for i=1:pos_nImages

@@ -12,58 +12,63 @@ ib = 0;
 confidences = zeros(0,1);
 image_names = cell(0,1);
 
+facts = [0.9 0.8 0.7 0.5 0.6 0.4 0.3];
 cellSize = 6;
 dim = 36;
 for i=1:nImages
     % load and show the image
-    im = im2single(imread(sprintf('%s/%s',imageDir,imageList(i).name)));
-    imshow(im);
+    image = im2single(imread(sprintf('%s/%s',imageDir,imageList(i).name)));
+    imshow(image);
     hold on;
-    
-    % generate a grid of features across the entire image. you may want to 
-    % try generating features more densely (i.e., not in a grid)
-    feats = vl_hog(im,cellSize);
-    
-    % concatenate the features into 6x6 bins, and classify them (as if they
-    % represent 36x36-pixel faces)
-    [rows,cols,~] = size(feats);    
-    confs = zeros(rows,cols);
-    
-    for r=1:rows-11
-        for c=1:cols-11
-
-        % create feature vector for the current window and classify it using the SVM model, 
-        x = feats(r:r+11, c:c+11, :);
-        % take dot product between feature vector and w and add b,
-        pred = dot(w, x(:)) + b;
-        % store the result in the matrix of confidence scores confs(r,c)
-        confs(r, c)= pred;
-        end
-    end
-       
-    % get the most confident predictions 
-    [~,inds] = sort(confs(:),'descend');
-    inds = inds(1:floor((rows*cols)/dim)); % (use a bigger number for better recall)
     aboxes = [];
     aconfs = [];
-    for n=1:numel(inds)        
-        [row,col] = ind2sub([size(feats,1) size(feats,2)],inds(n));
         
-        bbox = [ col*cellSize ...
-                 row*cellSize ...
-                (col+cellSize-1)*cellSize ...
-                (row+cellSize-1)*cellSize];
-        conf = confs(row,col);
-        % save    
-        aboxes = [aboxes; bbox];
-        aconfs = [aconfs; conf];
+    for fact=facts
+        im = imresize(image,fact);
         
+        % generate a grid of features across the entire image. you may want to 
+        % try generating features more densely (i.e., not in a grid)
+        feats = vl_hog(im,cellSize);
+
+        % concatenate the features into 6x6 bins, and classify them (as if they
+        % represent 36x36-pixel faces)
+        [rows,cols,~] = size(feats);    
+        confs = zeros(rows,cols);
+
+        for r=1:rows-5
+            for c=1:cols-5
+
+            % create feature vector for the current window and classify it using the SVM model, 
+            x = feats(r:r+5, c:c+5, :);
+            % take dot product between feature vector and w and add b,
+            pred = dot(w, x(:)) + b;
+            % store the result in the matrix of confidence scores confs(r,c)
+            confs(r, c)= pred;
+            end
+        end
+
+        % get the most confident predictions 
+        [~,inds] = sort(confs(:),'descend');
+        inds = inds(1:floor((rows*cols)/dim)); % (use a bigger number for better recall)
+        for n=1:numel(inds)        
+            [row,col] = ind2sub([size(feats,1) size(feats,2)],inds(n));
+
+            bbox = [ col*cellSize./fact ...
+                     row*cellSize./fact ...
+                    (col+cellSize-1)*cellSize./fact ...
+                    (row+cellSize-1)*cellSize./fact];
+            conf = confs(row,col);
+            % save    
+            aboxes = [aboxes; bbox];
+            aconfs = [aconfs; conf];
+
+        end
     end
     
     for index = 1:size(aboxes, 1)
         conf = aconfs(index);
         bbox = aboxes(index, :);
-        if (conf > 0.6)
+        if (conf > 0.9)
             for k=1:size(aconfs, 1)
                 pbox = aboxes(k, :);
                 bi=[max(bbox(1),pbox(1)) ; max(bbox(2),pbox(2)) ; min(bbox(3),pbox(3)) ; min(bbox(4),pbox(4))];

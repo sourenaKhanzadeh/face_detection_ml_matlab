@@ -9,7 +9,7 @@ valid_feats = cat(1,x_pos_valid,x_neg_valid);
 valid_labels = cat(1,ones(valid_pos_nImages,1),-1*ones(valid_neg_nImages,1));
 
 
-lambda = 0.1;
+lambda = 0.00005;
 [w,b] = vl_svmtrain(feats',labels',lambda);
 
 fprintf('Classifier performance on train data:\n')

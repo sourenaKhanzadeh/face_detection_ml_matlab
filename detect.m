@@ -64,7 +64,7 @@ for i=1:nImages
         conf = aconfs(index);
         bbox = aboxes(index, :);
         if (conf > 0.6)
-            for k=1:size(aboxes, 1)
+            for k=1:size(aconfs, 1)
                 pbox = aboxes(k, :);
                 bi=[max(bbox(1),pbox(1)) ; max(bbox(2),pbox(2)) ; min(bbox(3),pbox(3)) ; min(bbox(4),pbox(4))];
                 iw=bi(3)-bi(1)+1;

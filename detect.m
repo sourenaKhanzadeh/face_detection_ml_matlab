@@ -12,8 +12,9 @@ ib = 0;
 confidences = zeros(0,1);
 image_names = cell(0,1);
 
-facts = [0.9 0.8 0.7 0.5 0.6 0.4 0.3];
+facts = [0.9 0.7 0.6 0.4 0.2 ];
 cellSize = 6;
+marg = 5;
 dim = 36;
 for i=1:nImages
     % load and show the image
@@ -35,11 +36,11 @@ for i=1:nImages
         [rows,cols,~] = size(feats);    
         confs = zeros(rows,cols);
 
-        for r=1:rows-5
-            for c=1:cols-5
+        for r=1:rows-marg
+            for c=1:cols-marg
 
             % create feature vector for the current window and classify it using the SVM model, 
-            x = feats(r:r+5, c:c+5, :);
+            x = feats(r:r+marg, c:c+marg, :);
             % take dot product between feature vector and w and add b,
             pred = dot(w, x(:)) + b;
             % store the result in the matrix of confidence scores confs(r,c)
@@ -49,7 +50,11 @@ for i=1:nImages
 
         % get the most confident predictions 
         [~,inds] = sort(confs(:),'descend');
-        inds = inds(1:floor((rows*cols)/dim)); % (use a bigger number for better recall)
+        if (rows * cols) < 25
+            inds = inds(1:floor((rows*cols))); % (use a bigger number for better recall)
+        else
+            inds = inds(1:25); % (use a bigger number for better recall)
+        end
         for n=1:numel(inds)        
             [row,col] = ind2sub([size(feats,1) size(feats,2)],inds(n));
 
@@ -68,7 +73,7 @@ for i=1:nImages
     for index = 1:size(aboxes, 1)
         conf = aconfs(index);
         bbox = aboxes(index, :);
-        if (conf > 0.9)
+        if (conf > 0.8)
             for k=1:size(aconfs, 1)
                 pbox = aboxes(k, :);
                 bi=[max(bbox(1),pbox(1)) ; max(bbox(2),pbox(2)) ; min(bbox(3),pbox(3)) ; min(bbox(4),pbox(4))];
@@ -100,11 +105,12 @@ for i=1:nImages
                     bbox(3), bbox(2); ...
                     bbox(1), bbox(2)];
                 plot(plot_rectangle(:,1), plot_rectangle(:,2), 'g-');
+                
+                ib = ib + 1;
+                bboxes = [bboxes; bbox];
+                confidences = [confidences; conf];
+                image_names = [image_names; image_name];
             end
-            ib = ib + 1;
-            bboxes = [bboxes; bbox];
-            confidences = [confidences; conf];
-            image_names = [image_names; image_name];
         end
     end
 

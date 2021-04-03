@@ -44,8 +44,8 @@ for i=1:nImages
     % get the most confident predictions 
     [~,inds] = sort(confs(:),'descend');
     inds = inds(1:floor((rows*cols)/dim)); % (use a bigger number for better recall)
-    aboxes = zeros(4);
-    aconfs = zeros(1);
+    aboxes = [];
+    aconfs = [];
     for n=1:numel(inds)        
         [row,col] = ind2sub([size(feats,1) size(feats,2)],inds(n));
         
@@ -54,6 +54,15 @@ for i=1:nImages
                 (col+cellSize-1)*cellSize ...
                 (row+cellSize-1)*cellSize];
         conf = confs(row,col);
+        % save    
+        aboxes = [aboxes; bbox];
+        aconfs = [aconfs; conf];
+        
+    end
+    
+    for index = 1:size(aboxes, 1)
+        conf = aconfs(index);
+        bbox = aboxes(index, :);
         if (conf > 0.6)
             for k=1:size(aboxes, 1)
                 pbox = aboxes(k, :);
@@ -66,21 +75,16 @@ for i=1:nImages
                        (pbox(3)-pbox(1)+1)*(pbox(4)-pbox(2)+1)-...
                        iw*ih;
                     ov=iw*ih/ua;
-                    if ov > 0.5
-                        if conf > aconfs(k)
+                    if ov > 0.01
+                        if conf < aconfs(k)
                             bbox = [];
+                            conf = [];
                             break
-                        else
-                            bboxes(ib, :) = [];
-                            confidences(ib, :) = [];
-                            ib = ib- 1;
-                            continue
                         end
-                        
                     end
                 end
             end
-        
+
             image_name = {imageList(i).name};
 
             % plot
@@ -92,16 +96,14 @@ for i=1:nImages
                     bbox(1), bbox(2)];
                 plot(plot_rectangle(:,1), plot_rectangle(:,2), 'g-');
             end
-            % save    
-            aboxes = [aboxes; bbox];
-            aconfs = [aconfs; conf];
-            bboxes = [bboxes; bbox];
             ib = ib + 1;
+            bboxes = [bboxes; bbox];
             confidences = [confidences; conf];
             image_names = [image_names; image_name];
         end
     end
-%     pause;
+
+    pause;
     fprintf('got preds for image %d/%d\n', i,nImages);
 end
 

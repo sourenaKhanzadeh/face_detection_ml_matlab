@@ -29,11 +29,11 @@ for i=1:nImages
     [rows,cols,~] = size(feats);    
     confs = zeros(rows,cols);
     
-    for r=1:rows-5
-        for c=1:cols-5
+    for r=1:rows-11
+        for c=1:cols-11
 
         % create feature vector for the current window and classify it using the SVM model, 
-        x = feats(r:r+5, c:c+5, :);
+        x = feats(r:r+11, c:c+11, :);
         % take dot product between feature vector and w and add b,
         pred = dot(w, x(:)) + b;
         % store the result in the matrix of confidence scores confs(r,c)
@@ -103,7 +103,7 @@ for i=1:nImages
         end
     end
 
-    pause;
+%     pause;
     fprintf('got preds for image %d/%d\n', i,nImages);
 end
 

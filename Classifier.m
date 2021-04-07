@@ -17,9 +17,46 @@ classdef Classifier
     end
     
     methods
-        function obj = Classifier()
+        function obj = Classifier(dict)
+            if nargin == 0
+                dict = container.Map();
+            end
+            if ~isempty(dict)
+                dict_keys = keys(dict);
+                dict_value = values(dict);
+                i = 1;
+                for key=dict_keys
+                    val = dict_value{i};
+                    switch key{1}
+                        case ['feat_cellSize']
+                            obj.feat_cellSize = val;
+                        case ['feat_n_cell']
+                            obj.feat_n_cell = val;
+                        case ['lambda']
+                            obj.lambda = val;
+                        case ['scale']
+                            obj.scale = val;
+                        case ['downsample']
+                            obj.downsample = val;
+                        case ['cellSize']
+                            obj.cellSize = val;
+                        case ['marg']
+                            obj.marg = val;
+                        case ['factor']
+                            obj.factor = val;
+                        case ['thresh']
+                            obj.thresh = val;
+                        case ['ov_factor']
+                            obj.ov_factor = val;
+                        case ['top']
+                            obj.top = val;
+                    end
+                    i = i + 1;
+                end
+            end
             obj.featSize = obj.featSize * obj.feat_n_cell ^ 2;
-            obj.og_scale = obj.scale; 
+            obj.og_scale = obj.scale;
+            
         end
         
         function [train, n_images] = get_feature(self, image_dir, debug)

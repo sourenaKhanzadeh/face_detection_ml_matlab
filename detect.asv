@@ -12,10 +12,9 @@ ib = 0;
 confidences = zeros(0,1);
 image_names = cell(0,1);
 
-scale = 1.5;
-downsample = 0.9;
-cellSize = 3;
-marg = 11;
+facts = [1 0.95 0.9 0.85 0.8 .75 .7 .65 .6 .55 .5 .45 .4 .35 .3];
+cellSize = 6;
+marg = 5;
 dim = 36;
 for i=1:nImages
     % load and show the image
@@ -24,59 +23,59 @@ for i=1:nImages
     hold on;
     aboxes = [];
     aconfs = [];
-    [n, m] = size(image);    
-    while scale* min(n, m) >= 10
-        im = imresize(image,scale);
-        
-        % generate a grid of features across the entire image. you may want to 
-        % try generating features more densely (i.e., not in a grid)
-        feats = vl_hog(im,cellSize);
+    for fact1=facts
+        for fact2=facts
+            [n, m, z]  = 
+            im = imresize(image,[]);
 
-        % concatenate the features into 6x6 bins, and classify them (as if they
-        % represent 36x36-pixel faces)
-        [rows,cols,~] = size(feats);    
-        confs = zeros(rows,cols);
+            % generate a grid of features across the entire image. you may want to 
+            % try generating features more densely (i.e., not in a grid)
+            feats = vl_hog(im,cellSize);
 
-        for r=1:rows-marg
-            for c=1:cols-marg
+            % concatenate the features into 6x6 bins, and classify them (as if they
+            % represent 36x36-pixel faces)
+            [rows,cols,~] = size(feats);    
+            confs = zeros(rows,cols);
 
-            % create feature vector for the current window and classify it using the SVM model, 
-            x = feats(r:r+marg, c:c+marg, :);
-            % take dot product between feature vector and w and add b,
-            pred = dot(w, x(:)) + b;
-            % store the result in the matrix of confidence scores confs(r,c)
-            confs(r, c)= pred;
+            for r=1:rows-marg
+                for c=1:cols-marg
+
+                % create feature vector for the current window and classify it using the SVM model, 
+                x = feats(r:r+marg, c:c+marg, :);
+                % take dot product between feature vector and w and add b,
+                pred = dot(w, x(:)) + b;
+                % store the result in the matrix of confidence scores confs(r,c)
+                confs(r, c)= pred;
+                end
+            end
+
+            % get the most confident predictions 
+            [~,inds] = sort(confs(:),'descend');
+            if (rows * cols) < 25
+                inds = inds(1:floor((rows*cols))); % (use a bigger number for better recall)
+            else
+                inds = inds(1:25); % (use a bigger number for better recall)
+            end
+            for n=1:numel(inds)        
+                [row,col] = ind2sub([size(feats,1) size(feats,2)],inds(n));
+
+                bbox = [ col*cellSize./fact1 ...
+                         row*cellSize./fact1 ...
+                        (col+cellSize-1)*cellSize./fact2 ...
+                        (row+cellSize-1)*cellSize./fact2];
+                conf = confs(row,col);
+                % save    
+                aboxes = [aboxes; bbox];
+                aconfs = [aconfs; conf];
+
             end
         end
-
-        % get the most confident predictions 
-        [~,inds] = sort(confs(:),'descend');
-        if (rows * cols) < 25
-            inds = inds(1:floor((rows*cols))); % (use a bigger number for better recall)
-        else
-            inds = inds(1:25); % (use a bigger number for better recall)
-        end
-        for n=1:numel(inds)        
-            [row,col] = ind2sub([size(feats,1) size(feats,2)],inds(n));
-
-            bbox = [ col*cellSize/scale ...
-                     row*cellSize/scale ...
-                    (col+marg)*cellSize/scale ...
-                    (row+marg)*cellSize/scale];
-            conf = confs(row,col);
-            % save    
-            aboxes = [aboxes; bbox];
-            aconfs = [aconfs; conf];
-
-        end
-        scale = scale * downsample;
     end
-    scale = 1.5;
     
     for index = 1:size(aboxes, 1)
         conf = aconfs(index);
         bbox = aboxes(index, :);
-        if (conf > 1)
+        if (conf > .8)
             for k=1:size(aconfs, 1)
                 pbox = aboxes(k, :);
                 bi=[max(bbox(1),pbox(1)) ; max(bbox(2),pbox(2)) ; min(bbox(3),pbox(3)) ; min(bbox(4),pbox(4))];
@@ -117,7 +116,7 @@ for i=1:nImages
         end
     end
 
-%     pause;
+    pause;
     fprintf('got preds for image %d/%d\n', i,nImages);
 end
 

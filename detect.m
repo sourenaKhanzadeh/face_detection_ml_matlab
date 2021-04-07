@@ -3,7 +3,13 @@ run('../vlfeat-0.9.21/toolbox/vl_setup')
 
 imageDir = 'test_images';
 
-clf = Classifier;
+params = containers.Map(...
+    {'feat_cellSize', 'feat_n_cell', 'lambda', 'scale',...
+    'downsample', 'cellSize', 'marg', 'factor', 'thresh', 'ov_factor',...
+    'top'},...
+    {3, 12, 0.0001, 1.5, 0.8, 6, 11, 10, 0.8, 0.01, 20});
+
+clf = Classifier(params);
 [bboxes, confidences, image_names]  = clf.detect(imageDir); 
 
 

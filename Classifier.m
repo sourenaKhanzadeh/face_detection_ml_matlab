@@ -79,9 +79,9 @@ classdef Classifier
             end
         end
         
-        function [w, b, accs] = train(self)
-            load('pos_neg_feats.mat');
-            load('pos_neg_valid_feats.mat');
+        function [w, b, accs] = train(self, load_feats, load_valid_feats)
+            load(load_feats);
+            load(load_valid_feats);
 
             feats = cat(1,x_pos_train,x_neg_train);
             labels = cat(1,ones(pos_nImages,1),-1*ones(neg_nImages,1));
@@ -106,11 +106,20 @@ classdef Classifier
             accs = [tp_rate fp_rate tn_rate fn_rate; tp_rate_valid fp_rate_valid tn_rate_valid fn_rate_valid];
         end
         
-        function [bboxes, confidences, image_names] = detect(self, image_dir, paused)
+        function [bboxes, confidences, image_names] = detect(self, image_dir, paused, load_w_b, g)
             % load w and b
-            load("my_svm.mat");
             if nargin == 2
+                g = false;
                 paused = false;
+                load("my_svm.mat");
+            elseif nargin == 3
+                g = false;
+                load("my_svm.mat");
+            elseif nargin == 4
+                g = false;
+                load(load_w_b);
+            else
+                load(load_w_b);
             end
             
             imageList = dir(sprintf('%s/*.jpg',image_dir));
@@ -127,7 +136,9 @@ classdef Classifier
                 aboxes = [];
                 aconfs = [];
                 [n, m] = size(image); 
-                
+                if g
+                    image = rgb2gray(image);
+                end
                 while self.scale* min(n, m) >= self.factor
                     im = imresize(image,self.scale);
                     % generate a grid of features across the entire image. you may want to 

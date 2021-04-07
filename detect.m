@@ -13,8 +13,8 @@ confidences = zeros(0,1);
 image_names = cell(0,1);
 
 scale = 1.5;
-downsample = 0.9;
-cellSize = 3;
+downsample = 0.95;
+cellSize = 6;
 marg = 11;
 dim = 36;
 for i=1:nImages
@@ -27,11 +27,10 @@ for i=1:nImages
     [n, m] = size(image);    
     while scale* min(n, m) >= 10
         im = imresize(image,scale);
-        
         % generate a grid of features across the entire image. you may want to 
         % try generating features more densely (i.e., not in a grid)
         feats = vl_hog(im,cellSize);
-
+        
         % concatenate the features into 6x6 bins, and classify them (as if they
         % represent 36x36-pixel faces)
         [rows,cols,~] = size(feats);    
@@ -51,10 +50,10 @@ for i=1:nImages
 
         % get the most confident predictions 
         [~,inds] = sort(confs(:),'descend');
-        if (rows * cols) < 25
+        if (rows * cols) < 30
             inds = inds(1:floor((rows*cols))); % (use a bigger number for better recall)
         else
-            inds = inds(1:25); % (use a bigger number for better recall)
+            inds = inds(1:30); % (use a bigger number for better recall)
         end
         for n=1:numel(inds)        
             [row,col] = ind2sub([size(feats,1) size(feats,2)],inds(n));

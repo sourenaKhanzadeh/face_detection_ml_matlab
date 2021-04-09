@@ -29,7 +29,7 @@ classdef Classifier
             % if no arg is passed then set
             % dict to default Map type
             if nargin == 0
-                dict = container.Map();
+                dict = containers.Map();
             end
             if ~isempty(dict)
                 % take the dictionary

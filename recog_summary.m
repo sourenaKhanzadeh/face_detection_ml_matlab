@@ -1,0 +1,10 @@
+fprintf("for our training set and creating of the svm we pretty much just \n")
+fprintf("created four seperate image folders, two for training negative and positive images \n")
+fprintf("and two for the validation set of negative and postive images. \n")
+fprintf("for our cell size we shortened it from the default of 6 to 3\n")
+fprintf("in order to get a sharper and more accurate pattern.\n")
+fprintf("for our lambda values we went with a minimal balue of 0.00005 to make it more precise.\n")
+
+fprintf("our best accuracy for our validation set is as follows\n")
+fprintf("Classifier performance on test data: \n accuracy:   0.997 \n true  positive rate: 0.497\n")
+fprintf(" false positive rate: 0.000 \n true  negative rate: 0.500 \n false negative rate: 0.003\n")

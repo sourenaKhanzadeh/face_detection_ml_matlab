@@ -1,3 +1,14 @@
+%% CPS843/CP8307 Assignment 3 - MATLAB Machine Learning
+% Include this file in your submission. Do not modify it, other than to add 
+% your name and student number. The grader should be able to run this 
+% script to step through the entire assignment. 
+% - For multi-part questions, insert your own pauses, where appropriate.
+% - For written answer questions, print your answer in the MATLAB terminal.
+% Student Name: Sourena Khanzadeh
+% Student Number: 500929191
+% Student Name: Dylan Donsky
+% Student Number: 500700489 
+
 fprintf("for our approach on the detect faces the first thing we did was \n")
 fprintf("one we loaded in our svm W and B values we get all the images and initialize \n")
 fprintf("the confidences and and bounding boxes to an array of zeros\n")

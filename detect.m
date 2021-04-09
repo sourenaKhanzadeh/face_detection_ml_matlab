@@ -19,6 +19,7 @@ params = containers.Map(...
 
 
 clf = Classifier(params);
+% to pause change clf.detect(imageDir, true)
 [bboxes, confidences, image_names]  = clf.detect(imageDir); 
 
 
